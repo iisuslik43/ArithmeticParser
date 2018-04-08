@@ -8,7 +8,7 @@ To build file run:
 
 To run application use:
 
-`./build/install/ArithmeticParser/bin/ArithmeticParser`
+`./build/install/ArithmeticParser/bin/ArithmeticParser --file /path/to/file/filename`
 
 To run application on test file run:
 
