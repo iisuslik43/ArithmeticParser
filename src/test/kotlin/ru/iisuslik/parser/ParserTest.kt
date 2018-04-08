@@ -119,6 +119,14 @@ class ParserTest {
     }
 
     @Test
+    fun uselessBranches() {
+        val(rest, node) = parse("(2+2)")
+        assertEquals("", rest)
+        assertEquals(4, node.calculate())
+        printAllAboutNode(node)
+    }
+
+    @Test
     fun fromTestFile() {
         parseFromFile("./src/test/resources/testFile")
     }

@@ -1,5 +1,6 @@
 package ru.iisuslik.parser
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import com.xenomachina.argparser.ArgParser
 import java.io.File
 
@@ -61,11 +62,27 @@ fun parseP(s: String): Pair<String, Node> {
     if (s.isEmpty() || s.first() == ')') {
         throw ParserException("Empty Expression", s.length)
     }
-    return if (s[0] == '(') {
+    return if (s.first() == '(') {
         parseExpr(s.drop(1))
     } else {
         parseV(s)
     }
+}
+
+fun check(s: String): Boolean {
+    val str = s.filter { it == '(' || it == ')' }
+    var count = 0
+    for(i in 0 until str.length) {
+        if(str[i] == '(') {
+            count++
+        } else {
+            count--
+        }
+        if(count <= 0 && i != str.length - 1) {
+            return false
+        }
+    }
+    return true
 }
 
 fun parseV(s: String): Pair<String, Node> {
@@ -88,6 +105,12 @@ fun getStringFromFile(fileName: String): String {
 fun parse(s: String): Pair<String, Node> {
     if (s.isEmpty()) {
         throw ParserException("Empty Expression", s.length)
+    }
+    if(s.first() == '(' && s.last() == ')') {
+        if (check(s)) {
+            println("kek")
+            return parseP(s)
+        }
     }
     return parseExpr(s)
 }
