@@ -4,7 +4,7 @@ import com.xenomachina.argparser.ArgParser
 import java.io.File
 
 val binOp = mapOf('+' to 0, '-' to 0, '*' to 1, '/' to 1, '^' to 2)
-val specialSymbols = setOf(' ', '(', ')')
+val specialSymbols = setOf(' ', '(', ')', '\n')
 
 fun parseExpr(s: List<Token>): Pair<List<Token>, Node> {
     var (rest, prevNode) = parseU(s)
@@ -61,11 +61,10 @@ fun parseS(s: List<Token>): Pair<List<Token>, Node> {
 }
 
 fun parseP(s: List<Token>): Pair<List<Token>, Node> {
-    val firstToken = s.first()
-
     if (s.isEmpty()) {
         throw ParserException("Empty Expression", s.size)
     }
+    val firstToken = s.first()
     if (firstToken is OpToken) {
         if (binOp.containsKey(firstToken.op) || firstToken.op == ')') {
             throw ParserException("Empty Expression", s.size)

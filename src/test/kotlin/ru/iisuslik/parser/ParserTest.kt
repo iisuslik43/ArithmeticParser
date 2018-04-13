@@ -2,6 +2,7 @@ package ru.iisuslik.parser
 
 import org.junit.Assert.*
 import org.junit.Test
+import java.io.File
 
 class ParserTest {
     @Test
@@ -158,5 +159,22 @@ class ParserTest {
         assertEquals(5, node.calculate())
         assertEquals("(2+3)", node.toString())
         printAllAboutNode(node)
+    }
+
+    @Test
+    fun allTests() {
+        val tests = File("./src/test/resources/tests")
+        val files = tests.listFiles()
+        files.sort()
+        for(file in files) {
+            println(file.name)
+            try {
+                parseFromFile(file.absolutePath)
+            } catch (e: ParserException) {
+                println(e.message)
+            } catch (e: ArithmeticException) {
+                println(e.message)
+            }
+        }
     }
 }
