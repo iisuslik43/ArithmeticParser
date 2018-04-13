@@ -1,100 +1,80 @@
 package ru.iisuslik.parser
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.xenomachina.argparser.ArgParser
 import java.io.File
 
 val binOp = mapOf('+' to 0, '-' to 0, '*' to 1, '/' to 1, '^' to 2)
+val specialSymbols = setOf(' ', '(', ')')
 
-fun parseExpr(s: String): Pair<String, Node> {
+fun parseExpr(s: List<Token>): Pair<List<Token>, Node> {
     var (rest, prevNode) = parseU(s)
     while (!rest.isEmpty()) {
-        val op = rest[0]
-        if (binOp[op] != 0) {
-            if (op == ')') {
+        val token = rest.first()
+        if (token is NumToken) {
+            throw ParserException("Unexpect num", rest.size)
+        } else if (token is OpToken) {
+            if (token.op == ')') {
                 return Pair(rest.drop(1), prevNode)
             }
-            throw ParserException("Symbol $op isn`t operation or number", rest.length)
+            val (newRest, node) = parseU(rest.drop(1))
+            rest = newRest
+            prevNode = OpNode(token.op, prevNode, node)
         }
-        val (newRest, node) = parseU(rest.drop(1))
-        rest = newRest
-        prevNode = OpNode(op, prevNode, node)
     }
     return Pair(rest, prevNode)
 }
 
-fun parseU(s: String): Pair<String, Node> {
+fun parseU(s: List<Token>): Pair<List<Token>, Node> {
     var (rest, prevNode) = parseS(s)
     while (!rest.isEmpty()) {
-        val op = rest[0]
-        if (binOp[op] != 1) {
-            if (op == ')' || binOp[op] == 0) {
+        val token = rest[0]
+        if (token is NumToken) {
+            throw ParserException("Unexpected num", rest.size)
+        } else if (token is OpToken) {
+            if (token.op == ')' || binOp[token.op] == 0) {
                 return Pair(rest, prevNode)
             }
-            throw ParserException("Symbol $op isn`t operation or number", rest.length)
+            val (newRest, node) = parseS(rest.drop(1))
+            rest = newRest
+            prevNode = OpNode(token.op, prevNode, node)
+        }
+    }
+    return Pair(rest, prevNode)
+}
+
+fun parseS(s: List<Token>): Pair<List<Token>, Node> {
+    var (rest, prevNode) = parseP(s)
+    if (rest.isEmpty())
+        return Pair(rest, prevNode)
+    val token = rest.first()
+    if (token is NumToken) {
+        throw ParserException("Unexpected num", rest.size)
+    } else if (token is OpToken) {
+        if (binOp[token.op] != 2) {
+            return Pair(rest, prevNode)
         }
         val (newRest, node) = parseS(rest.drop(1))
         rest = newRest
-        prevNode = OpNode(op, prevNode, node)
+        prevNode = OpNode(token.op, prevNode, node)
     }
     return Pair(rest, prevNode)
 }
 
-fun parseS(s: String): Pair<String, Node> {
-    var (rest, prevNode) = parseP(s)
-    if (rest == "")
-        return Pair(rest, prevNode)
-    val op = rest[0]
-    if (binOp[op] != 2) {
-        if (op == ')' || binOp[op] == 0 || binOp[op] == 1) {
-            return Pair(rest, prevNode)
-        }
-        throw ParserException("Symbol $op isn`t operation or number", rest.length)
-    }
-    val (newRest, node) = parseS(rest.drop(1))
-    rest = newRest
-    prevNode = OpNode(op, prevNode, node)
+fun parseP(s: List<Token>): Pair<List<Token>, Node> {
+    val firstToken = s.first()
 
-    return Pair(rest, prevNode)
-}
-
-fun parseP(s: String): Pair<String, Node> {
-    if (s.isEmpty() || s.first() == ')') {
-        throw ParserException("Empty Expression", s.length)
+    if (s.isEmpty()) {
+        throw ParserException("Empty Expression", s.size)
     }
-    return if (s.first() == '(') {
-        parseExpr(s.drop(1))
-    } else {
-        parseV(s)
-    }
-}
-
-fun check(s: String): Boolean {
-    val str = s.filter { it == '(' || it == ')' }
-    var count = 0
-    for(i in 0 until str.length) {
-        if(str[i] == '(') {
-            count++
-        } else {
-            count--
+    if (firstToken is OpToken) {
+        if (binOp.containsKey(firstToken.op) || firstToken.op == ')') {
+            throw ParserException("Empty Expression", s.size)
         }
-        if(count <= 0 && i != str.length - 1) {
-            return false
-        }
+        return parseExpr(s.drop(1))
+    } else if (firstToken is NumToken) {
+        return Pair(s.drop(1), VNode(firstToken.value))
     }
-    return true
-}
-
-fun parseV(s: String): Pair<String, Node> {
-    var res = 0
-    for (i in 0 until s.length) {
-        if (s[i].isDigit()) {
-            res = res * 10 + (s[i] - '0')
-        } else {
-            return Pair(s.drop(i), VNode(res))
-        }
-    }
-    return Pair("", VNode(res))
+    throw ParserException("Strange token", -1)
 }
 
 
@@ -102,18 +82,63 @@ fun getStringFromFile(fileName: String): String {
     return File(fileName).readText()
 }
 
-fun parse(str: String): Pair<String, Node> {
-    val s = str.filterNot { it == ' ' }
+
+fun check(s: String): Boolean {
+    val str = s.filter { it == '(' || it == ')' }
+    var count = 0
+    for (i in 0 until str.length) {
+        if (str[i] == '(') {
+            count++
+        } else {
+            count--
+        }
+        if (count <= 0 && i != str.length - 1) {
+            return false
+        }
+    }
+    return true
+}
+
+fun getTokens(s: String): List<Token> {
+    val res = mutableListOf<Token>()
+    var curToken: NumToken? = null
+    for (i in 0 until s.length) {
+        val c = s[i]
+        if (c.isDigit()) {
+            if (curToken == null) {
+                curToken = NumToken(c - '0')
+            } else {
+                curToken.value = curToken.value * 10 + (c - '0')
+            }
+        } else {
+            if (!binOp.containsKey(c) && !specialSymbols.contains(c)) {
+                throw ParserException("Symbol $c isn`t operation or number", s.length - i)
+            }
+            if (curToken != null) {
+                res.add(curToken)
+                curToken = null
+            }
+            if (!c.isWhitespace()) {
+                res.add(OpToken(c))
+            }
+        }
+    }
+    if (curToken != null) {
+        res.add(curToken)
+    }
+    return res
+}
+
+fun parse(s: String): Pair<List<Token>, Node> {
     if (s.isEmpty()) {
         throw ParserException("Empty Expression", s.length)
     }
-    if(s.first() == '(' && s.last() == ')') {
+    if (s.first() == '(' && s.last() == ')') {
         if (check(s)) {
-            println("kek")
-            return parseP(s)
+            return parseP(getTokens(s))
         }
     }
-    return parseExpr(s)
+    return parseExpr(getTokens(s))
 }
 
 fun parseFromFile(filename: String) {
