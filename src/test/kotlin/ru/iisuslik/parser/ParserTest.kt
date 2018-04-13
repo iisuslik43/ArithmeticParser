@@ -67,7 +67,7 @@ class ParserTest {
 
     @Test
     fun harderBrackets() {
-        val (rest, node) = parse("2^(3+7*(3-2-1))+1")
+        val (rest, node) = parse("2^(3 + 7 * (3 - 2 - 1)) + 1")
         assertEquals("", rest)
         assertEquals(9, node.calculate())
         printAllAboutNode(node)
@@ -108,7 +108,7 @@ class ParserTest {
 
     @Test
     fun bigNumbers() {
-        val (rest, node) = parse("434343+43411-123124")
+        val (rest, node) = parse("434343 + 43411 - 123124")
         assertEquals("", rest)
         assertEquals(354630, node.calculate())
         printAllAboutNode(node)
@@ -116,7 +116,7 @@ class ParserTest {
 
     @Test
     fun bracketTest1() {
-        val (rest, node) = parse("(2+2)*2")
+        val (rest, node) = parse("(2 + 2)*2")
         assertEquals("", rest)
         assertEquals(8, node.calculate())
         printAllAboutNode(node)

@@ -102,7 +102,8 @@ fun getStringFromFile(fileName: String): String {
     return File(fileName).readText()
 }
 
-fun parse(s: String): Pair<String, Node> {
+fun parse(str: String): Pair<String, Node> {
+    val s = str.filterNot { it == ' ' }
     if (s.isEmpty()) {
         throw ParserException("Empty Expression", s.length)
     }
