@@ -171,6 +171,7 @@ class ParserTest {
             try {
                 parseFromFile(file.absolutePath)
             } catch (e: ParserException) {
+                assertTrue(file.name.contains('e'))
                 println(e.message)
             } catch (e: ArithmeticException) {
                 println(e.message)
