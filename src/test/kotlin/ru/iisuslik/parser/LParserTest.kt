@@ -104,4 +104,9 @@ class LParserTest {
         assertEquals("KeyWord_IF(0, 0, 1); SplitSymbol('(', 0, 3, 3); Ident(\"x\", 0, 4, 4); SplitSymbol(')', 0, 5, 5); ",
                 LParser("if (x)").stringRest())
     }
+
+    @Test
+    fun fromFile() {
+        println(LParser(getStringFromFile("./src/test/resources/ltest")).stringRest())
+    }
 }
