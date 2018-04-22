@@ -92,8 +92,12 @@ class LParser(s: String) {
 
 fun main(args: Array<String>) {
     val argParser = ParserArgs(ArgParser(args))
-    val parser = LParser(getStringFromFile(argParser.filename))
-    println(parser.stringRest())
+    try {
+        val parser = LParser(getStringFromFile(argParser.filename))
+        println(parser.stringRest())
+    } catch(e: ParserException) {
+        println(e.message)
+    }
 }
 
 class ParserArgs(parser: ArgParser) {
