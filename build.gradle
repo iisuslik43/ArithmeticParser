@@ -48,4 +48,26 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-mainClassName = "ru.iisuslik.parser.ArithmeticParserKt"
+mainClassName = "ru.iisuslik.parser.LParserKt"
+
+startScripts.enabled = false
+
+task lParser(type: CreateStartScripts) {
+    mainClassName = 'ru.iisuslik.parser.LParserKt'
+    applicationName = 'LParser'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = jar.outputs.files + project.configurations.runtime
+}
+
+task arithmParser(type: CreateStartScripts) {
+    mainClassName = 'ru.iisuslik.parser.ArithmeticParserKt'
+    applicationName = 'ArithmeticParser'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = jar.outputs.files + project.configurations.runtime
+}
+
+applicationDistribution.into('bin') {
+    from(lParser)
+    from(arithmParser)
+    fileMode = 0755
+}

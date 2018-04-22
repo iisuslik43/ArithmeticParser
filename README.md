@@ -1,10 +1,12 @@
 # ArithmeticParser
 
-To build application run:
+* To build application run:
 
 `sudo chmod +x ./build.sh`
 
 `./build.sh`
+
+* How to run ArithmeticParser:
 
 `./build/install/ArithmeticParser/bin/ArithmeticParser` - this is path to binary file, so
 to run application use:
@@ -14,3 +16,7 @@ to run application use:
 To run application on test file run:
 
 `./build/install/ArithmeticParser/bin/ArithmeticParser --file ./src/test/resources/testFile`
+
+* How to run LParser:
+
+`./build/install/ArithmeticParser/bin/LParser --file /path/to/file/filename`
