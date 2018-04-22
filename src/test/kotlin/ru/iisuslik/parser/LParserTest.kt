@@ -109,4 +109,19 @@ class LParserTest {
     fun fromFile() {
         println(LParser(getStringFromFile("./src/test/resources/ltest")).stringRest())
     }
+
+    @Test
+    fun minus() {
+        println(LParser("2 - 2").stringRest())
+    }
+
+    @Test
+    fun eq1() {
+        println(LParser("2 = 2").stringRest())
+    }
+
+    @Test
+    fun eq2() {
+        println(LParser("2 == 2").stringRest())
+    }
 }

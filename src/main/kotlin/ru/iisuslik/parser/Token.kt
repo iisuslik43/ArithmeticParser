@@ -11,7 +11,7 @@ enum class KeyWord() {
 }
 
 val splitTokens = setOf("(", ")", ";", ",")
-val operations = setOf("+", "−", "*", "/", "%", "==", "!=", ">", ">=", "<", "<=", "&&", "||")
+val operations = setOf("+", "-", "*", "/", "%", "==", "!=", ">", ">=", "<", "<=", "&&", "||", "=")
 
 
 open class Token(sNumber: Int, position: Int, str: String) {

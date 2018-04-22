@@ -4,7 +4,7 @@ import com.xenomachina.argparser.ArgParser
 import com.xenomachina.text.clear
 
 val blankSymbols = setOf(' ', '\n', '\t')
-val operationsFirstSymbols = setOf('+', '−', '*', '/', '%', '=', '!', '>', '>', '<', '<', '&', '|')
+val operationsFirstSymbols = setOf('+', '-', '*', '/', '%', '=', '!', '>', '>', '<', '<', '&', '|')
 
 class LParser(s: String) {
     var rest = getTokens(s)
