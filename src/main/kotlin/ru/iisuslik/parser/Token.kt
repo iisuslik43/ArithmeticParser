@@ -70,7 +70,7 @@ class KToken(sNumber: Int, position: Int, str: String) : Token(sNumber, position
         }
     }
 
-    override fun toString(): String = "KeyWord_${keyWord.toString()}(${super.toString()})"
+    override fun toString(): String = "KeyWord_$keyWord(${super.toString()})"
 }
 
 
@@ -91,7 +91,7 @@ class SToken(sNumber: Int, position: Int, str: String) : Token(sNumber, position
 class IToken(sNumber: Int, position: Int, str: String) : Token(sNumber, position, str) {
     val ident = checkIdent(s)
     private fun checkIdent(s: String): String {
-        val regex = "[a-zx_]\\w*".toRegex()
+        val regex = "[a-z_]\\w*".toRegex()
         if (regex.matchEntire(s) != null) {
             return s
         }
