@@ -22,10 +22,15 @@ To run application on test file run:
 
 * How to run LParser:
 
-`./build/install/ArithmeticParser/bin/LParser 
+`./build/install/ArithmeticParser/bin/KekParser 
 --file /path/to/file/filename`
 
-#Синтаксис L
+* How to run LTokens:
+
+`./build/install/ArithmeticParser/bin/KekTokens
+--file /path/to/file/filename`
+
+#Синтаксис языка kek
 
 Переносы строк и пробелы игнорируются после разбиения на токены, 
 поэтому всё строится на скобочках и все пробелы 
@@ -41,7 +46,7 @@ OP = `{+, -, *, /, %, ==, !=, >, >=, <, <=, &&, ||, =}`
 
 * Числа
  
-NUM =
+NUM - то, что принимается parseDouble() Котлина
  
 * Идентификаторы языка
 
@@ -82,7 +87,9 @@ WHILE = `while (EXPR) {ST*}`
 
 Write = `write(EXPR)`
 
-- Вся программа - это ST*
+* Вся программа
+
+Main = `List(ST)`
 
 #Пример
 
@@ -98,7 +105,7 @@ function2 = fun (f) {
     return f(2, 3);
 }
 
-x = 43
+x = 43;
 
 while(x) {
     function2(function);

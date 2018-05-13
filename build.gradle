@@ -48,13 +48,20 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-mainClassName = "ru.iisuslik.parser.LParserKt"
+mainClassName = "ru.iisuslik.parser.KekParserKt"
 
 startScripts.enabled = false
 
-task lParser(type: CreateStartScripts) {
-    mainClassName = 'ru.iisuslik.parser.LParserKt'
-    applicationName = 'LParser'
+task kekParser(type: CreateStartScripts) {
+    mainClassName = 'ru.iisuslik.parser.KekParserKt'
+    applicationName = 'KekParser'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = jar.outputs.files + project.configurations.runtime
+}
+
+task kekTokens(type: CreateStartScripts) {
+    mainClassName = 'ru.iisuslik.parser.KekTokensKt'
+    applicationName = 'KekTokens'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = jar.outputs.files + project.configurations.runtime
 }
@@ -67,7 +74,8 @@ task arithmParser(type: CreateStartScripts) {
 }
 
 applicationDistribution.into('bin') {
-    from(lParser)
+    from(kekParser)
     from(arithmParser)
+    from(kekTokens)
     fileMode = 0755
 }

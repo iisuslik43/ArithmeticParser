@@ -6,7 +6,7 @@ import com.xenomachina.text.clear
 val blankSymbols = setOf(' ', '\n', '\t')
 val operationsFirstSymbols = setOf('+', '-', '*', '/', '%', '=', '!', '>', '>', '<', '<', '&', '|')
 
-class LParser(s: String) {
+class KekParser(s: String) {
     var rest = getTokens(s)
 
     private fun next(): Token {
@@ -53,12 +53,6 @@ class LParser(s: String) {
         val sa = str.split('\n')
         for (s in sa) {
             var i = 0
-            while (i in s.indices && s[i] in blankSymbols) {
-                i++
-            }
-            if (i + 1 in s.indices && s[i] == '/' && s[i + 1] == '/') {
-                break
-            }
             while (i in s.indices) {
                 val c = s[i]
                 if (c in blankSymbols) {
@@ -107,7 +101,7 @@ class LParser(s: String) {
         return sb.toString()
     }
 
-    fun parseL(): Node {
+    fun parseL(): MainNode {
         val program = mutableListOf<StNode>()
         while (!rest.isEmpty()) {
             program.add(parseSt())
@@ -188,7 +182,7 @@ class LParser(s: String) {
             skipSplit(")")
             return ExprVNode(res)
         }
-        throw ParserException("Unexpected token in expression", first.pos)
+        throw ParserException("Unexpected token in expression + ${first.pos}", first.pos)
     }
 
     private fun parseCall(): CallNode {
@@ -239,7 +233,9 @@ class LParser(s: String) {
             val first = rest.first()
             if (first is KToken && first.keyWord == KeyWord.ELSE) {
                 elseWord = next() as KToken
+                skipSplit("{")
                 elseBody = NodeList(parseStList())
+                skipSplit("}")
             }
         }
         return IfNode(ifToken as KToken, condition, NodeList(body), elseWord, elseBody)
@@ -289,8 +285,8 @@ class LParser(s: String) {
 fun main(args: Array<String>) {
     val argParser = ParserArgs(ArgParser(args))
     try {
-        val parser = LParser(getStringFromFile(argParser.filename))
-        println(parser.stringRest())
+        val parser = KekParser(getStringFromFile(argParser.filename))
+        println(parser.parseL().getTree())
     } catch (e: ParserException) {
         println(e.message)
     }

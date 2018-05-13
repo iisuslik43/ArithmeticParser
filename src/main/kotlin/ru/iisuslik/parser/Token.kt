@@ -70,7 +70,7 @@ class KToken(sNumber: Int, position: Int, str: String) : Token(sNumber, position
         }
     }
 
-    override fun toString(): String = "KeyWord_$keyWord(${super.toString()})"
+    override fun toString(): String = "$keyWord(${super.toString()})"
 }
 
 

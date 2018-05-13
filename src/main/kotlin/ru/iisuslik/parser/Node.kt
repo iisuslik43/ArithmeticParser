@@ -3,7 +3,7 @@ package ru.iisuslik.parser
 import java.util.concurrent.locks.Condition
 
 interface Node {
-    open fun getTree(prefix: String, isTail: Boolean): String
+    fun getTree(prefix: String, isTail: Boolean): String
 }
 
 ///
@@ -48,8 +48,7 @@ class CallNode(var name: INode, var args: NodeList<ExprNode>) : VNode {
 
 class BoolNode(var value: BToken) : VNode {
     override fun getTree(prefix: String, isTail: Boolean): String {
-        var res = prefix + (if (isTail) "└── " else "├── ") + value + '\n'
-        return res
+        return prefix + (if (isTail) "└── " else "├── ") + value + '\n'
     }
 
     override fun toString(): String {
@@ -105,8 +104,7 @@ class ExprVNode(var node: ExprNode) : VNode {
 
 class ReadNode(var keyWord: KToken) : VNode {
     override fun getTree(prefix: String, isTail: Boolean): String {
-        var res = prefix + (if (isTail) "└── " else "├── ") + keyWord + '\n'
-        return res
+        return prefix + (if (isTail) "└── " else "├── ") + keyWord + '\n'
     }
 
     override fun toString(): String {
@@ -116,9 +114,7 @@ class ReadNode(var keyWord: KToken) : VNode {
 
 ///
 
-interface StNode : Node {
-
-}
+interface StNode : Node
 
 class IfNode(var ifWord: KToken, var condition: ExprNode, var ifBody: NodeList<StNode>,
              var elseWord: KToken? = null, var elseBody: NodeList<StNode>? = null) : StNode {
@@ -130,7 +126,7 @@ class IfNode(var ifWord: KToken, var condition: ExprNode, var ifBody: NodeList<S
             res += ifBody.getTree(prefix + (if (isTail) "    " else "│   "), true, "If body")
         } else {
             res += ifBody.getTree(prefix + (if (isTail) "    " else "│   "), false, "If body")
-            res += prefix + "│   " + elseWord + '\n'
+            res += prefix + "    ├── " + elseWord + '\n'
             res += ifBody.getTree(prefix + (if (isTail) "    " else "│   "), true, "Else body")
         }
         return res
@@ -182,8 +178,9 @@ class WriteNode(var writeWord: KToken, var expr: ExprNode) : StNode {
 class ANode(var varName: INode, var EqOp: OToken, var expr: ExprNode) : StNode {
 
     override fun getTree(prefix: String, isTail: Boolean): String {
-        var res = prefix + (if (isTail) "└── " else "├── ") + varName + '\n'
-        res += prefix + "│   ├── " + EqOp + '\n'
+        var res = prefix + (if (isTail) "└── " else "├── ") + "Assignment" + '\n'
+        res += varName.getTree(prefix + (if (isTail) "    " else "│   "), false)
+        res += prefix + (if (isTail) "    " else "│   ") + "├── " + EqOp + '\n'
         res += expr.getTree(prefix + (if (isTail) "    " else "│   "), true)
         return res
     }
@@ -210,6 +207,10 @@ class RetNode(var returnWord: KToken, var expr: ExprNode) : StNode {
 ///
 
 class MainNode(var statements: NodeList<StNode>) : Node {
+
+    fun getTree(): String {
+        return getTree("", true)
+    }
 
     override fun getTree(prefix: String, isTail: Boolean): String {
         return statements.getTree(prefix + (if (isTail) "    " else "│   "), true, "Main")
