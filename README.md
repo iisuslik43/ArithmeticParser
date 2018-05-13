@@ -20,12 +20,12 @@ To run application on test file run:
 `./build/install/ArithmeticParser/bin/ArithmeticParser 
 --file ./src/test/resources/testFile`
 
-* How to run LParser:
+* How to run KekParser:
 
 `./build/install/ArithmeticParser/bin/KekParser 
 --file /path/to/file/filename`
 
-* How to run LTokens:
+* How to run KekTokens:
 
 `./build/install/ArithmeticParser/bin/KekTokens
 --file /path/to/file/filename`
