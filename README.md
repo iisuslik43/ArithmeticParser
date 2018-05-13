@@ -30,7 +30,7 @@ To run application on test file run:
 `./build/install/ArithmeticParser/bin/KekTokens
 --file /path/to/file/filename`
 
-#Синтаксис языка kek
+# Синтаксис языка kek
 
 Переносы строк и пробелы игнорируются после разбиения на токены, 
 поэтому всё строится на скобочках и все пробелы 
@@ -91,7 +91,7 @@ Write = `write(EXPR)`
 
 Main = `List(ST)`
 
-#Пример
+# Пример
 
 ```
 function = fun (x, y) {
