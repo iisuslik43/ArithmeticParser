@@ -7,7 +7,9 @@ enum class KeyWord() {
     READ,
     WRITE,
     RETURN,
-    FUN
+    FUN,
+    DO,
+    THEN
 }
 
 val splitTokens = setOf("(", ")", ";", ",", "{", "}")

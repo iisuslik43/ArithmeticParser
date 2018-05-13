@@ -199,7 +199,7 @@ return 42; """
         write(c);
     }
     """
-        println(KekParser(s).parseL().getTree("", true))
+        println(KekParser(s).parseL().getTree())
     }
 
     @Test
@@ -208,7 +208,17 @@ return 42; """
         write(func(2+3) + 6);
         x = read;
     """
-        println(KekParser(s).parseL().getTree("", true))
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun hardComments() {
+        val s = """
+    // asd asd232 asdadg
+    return 0;
+    x = x + 2;//asd
+    """
+        println(KekParser(s).parseL().getTree())
     }
 
 }

@@ -55,6 +55,9 @@ class KekParser(s: String) {
             var i = 0
             while (i in s.indices) {
                 val c = s[i]
+                if (i + 1 in s.indices && c == '/' && s[i + 1] == '/') {
+                    break
+                }
                 if (c in blankSymbols) {
                     clearBuilder(sb, tokens, stringNumber, pos)
                     pos = i + 1
