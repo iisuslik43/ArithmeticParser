@@ -17,7 +17,7 @@ class ArithmeticParser(str: String) {
         rest = rest.drop(1)
     }
 
-    fun parseExpr(): Node {
+    fun parseExpr(): ArithmNode {
         var prevNode = parseU()
         while (!rest.isEmpty()) {
             val token = rest.first()
@@ -30,13 +30,13 @@ class ArithmeticParser(str: String) {
                 }
                 next()
                 val node = parseU()
-                prevNode = OpNode(token.op, prevNode, node)
+                prevNode = OpArithmNode(token.op, prevNode, node)
             }
         }
         return prevNode
     }
 
-    private fun parseU(): Node {
+    private fun parseU(): ArithmNode {
         var prevNode = parseS()
         while (!rest.isEmpty()) {
             val token = rest[0]
@@ -48,13 +48,13 @@ class ArithmeticParser(str: String) {
                 }
                 next()
                 val node = parseS()
-                prevNode = OpNode(token.op, prevNode, node)
+                prevNode = OpArithmNode(token.op, prevNode, node)
             }
         }
         return prevNode
     }
 
-    private fun parseS(): Node {
+    private fun parseS(): ArithmNode {
         var prevNode = parseP()
         if (rest.isEmpty())
             return prevNode
@@ -67,12 +67,12 @@ class ArithmeticParser(str: String) {
             }
             next()
             val node = parseS()
-            prevNode = OpNode(token.op, prevNode, node)
+            prevNode = OpArithmNode(token.op, prevNode, node)
         }
         return prevNode
     }
 
-    fun parseP(): Node {
+    fun parseP(): ArithmNode {
         if (rest.isEmpty()) {
             throw ParserException("Empty Expression", pos)
         }
@@ -85,7 +85,7 @@ class ArithmeticParser(str: String) {
             return parseExpr()
         } else if (firstToken is NumToken) {
             next()
-            return VNode(firstToken.value)
+            return VArithmNode(firstToken.value)
         }
         throw ParserException("Strange token", pos)
     }
@@ -143,7 +143,7 @@ fun getStringFromFile(fileName: String): String {
     return File(fileName).readText()
 }
 
-fun parse(s: String): Pair<List<ArithmToken>, Node> {
+fun parse(s: String): Pair<List<ArithmToken>, ArithmNode> {
     val parser = ArithmeticParser(s)
     if (s.isEmpty()) {
         throw ParserException("Empty Expression", s.length)
@@ -171,12 +171,12 @@ fun parseFromFile(filename: String) {
 
 
 
-fun printAllAboutNode(node: Node) {
+fun printAllAboutNode(arithmNode: ArithmNode) {
     println("\nFirst appearance\n")
-    println(node)
+    println(arithmNode)
     println("\nSecond appearance\n")
-    println(Node.getTree(node, "", true))
-    println("Calculation result: ${node.calculate()}")
+    println(ArithmNode.getTree(arithmNode, "", true))
+    println("Calculation result: ${arithmNode.calculate()}")
 }
 
 fun main(args: Array<String>) {

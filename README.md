@@ -49,11 +49,13 @@ I = `[a-z_]\w*`
 
 * Все выражения
 
-ST = `IF | EXPR ; | RW ; | WHILE | CALL ; | ASSIGN ; | return EXPR;`
+ST = `IF | EXPR ; | Write ; | WHILE | ASSIGN ; | return EXPR;`
 
 * Маленькое выражение из чисел, идентификаторов и вызовов функций
 
-EXPR = `NUM | I | CALL | FUN | EXPR OP EXPR`
+EXPR = `V | V OP EXPR`
+
+V = `NUM | I | CALL | FUN | read | true | false | (EXPR)`
 
 * Функция, нет имени, потому что функции - это тоже объекты и их
 нужно писать через =
@@ -78,7 +80,7 @@ WHILE = `while (EXPR) {ST*}`
 
 * Чтение и запись
 
-RW = `read (I) | write(EXPR)`
+Write = `write(EXPR)`
 
 - Вся программа - это ST*
 

@@ -25,7 +25,7 @@ class LParserTest {
     fun numMatch() {
         assertEquals(0.1, NToken(0, 0, "0.1").num, 0.001)
         assertEquals(1.0, NToken(0, 0, "1").num, 0.001)
-        assertFalse(NToken(0,0, "0.00.1").isOk)
+        assertFalse(NToken(0, 0, "0.00.1").isOk)
         println(NToken(0, 0, "0.1"))
     }
 
@@ -58,7 +58,7 @@ class LParserTest {
     @Test
     fun simple() {
         println(LParser("return 2;").stringRest())
-        assertEquals("Ident(\"return\", 0, 0, 5); Num(2.0, 0, 7, 7); SplitSymbol(';', 0, 8, 8); ",
+        assertEquals("KeyWord_RETURN(0, 0, 5); Num(2.0, 0, 7, 7); SplitSymbol(';', 0, 8, 8); ",
                 LParser("return 2;").stringRest())
     }
 
@@ -76,11 +76,13 @@ class LParserTest {
         println(LParser(s).stringRest())
         assertEquals("Ident(\"x\", 0, 0, 0); KeyWord_IF(1, 0, 1); ", LParser(s).stringRest())
     }
+
     @Test
     fun twoWhitespaces() {
         println(LParser("if  x").stringRest())
         assertEquals("KeyWord_IF(0, 0, 1); Ident(\"x\", 0, 4, 4); ", LParser("if  x").stringRest())
     }
+
     @Test
     fun tab() {
         println(LParser("if x").stringRest())
@@ -123,5 +125,46 @@ class LParserTest {
     @Test
     fun eq2() {
         println(LParser("2 == 2").stringRest())
+    }
+
+    @Test
+    fun veryHard() {
+        val s = """function = fun (x, y) {
+    if (x == y) {
+        c = x + y;
+        write(c);
+        return false;
+    }
+    else {
+        return true;
+    }
+};
+
+function2 = fun (f) {
+    return f(2, 3);
+};
+
+x = 43;
+
+while(x) {
+    function2(function);
+}
+
+return 42; """
+        println(LParser(s).stringRest())
+        println(LParser(s).parseL())
+        println(LParser(s).parseL().getTree("", true))
+    }
+
+    @Test
+    fun lol() {
+        val k = -975.31e+24
+        println(LParser("-975.31e-2").stringRest())
+    }
+
+    @Test
+    fun lol2() {
+        val k = -975.31e+24
+        println(LParser("//2").stringRest())
     }
 }

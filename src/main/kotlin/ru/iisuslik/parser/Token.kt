@@ -2,15 +2,15 @@ package ru.iisuslik.parser
 
 enum class KeyWord() {
     IF,
-    THEN,
     ELSE,
     WHILE,
-    DO,
     READ,
-    WRITE
+    WRITE,
+    RETURN,
+    FUN
 }
 
-val splitTokens = setOf("(", ")", ";", ",")
+val splitTokens = setOf("(", ")", ";", ",", "{", "}")
 val operations = setOf("+", "-", "*", "/", "%", "==", "!=", ">", ">=", "<", "<=", "&&", "||", "=")
 
 
