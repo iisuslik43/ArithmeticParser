@@ -47,7 +47,7 @@ class OpArithmNode(val op: Char, val left: ArithmNode, val right: ArithmNode) : 
             '/' -> res1 / res2
             '^' -> res1.toDouble().pow(res2).toInt()
             else -> {
-                throw ParserException("Wrong operation", -1)
+                throw ParserException("Wrong operation", -1, -1)
             }
         }
     }

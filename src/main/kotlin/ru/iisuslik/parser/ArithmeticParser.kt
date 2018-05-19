@@ -22,7 +22,7 @@ class ArithmeticParser(str: String) {
         while (!rest.isEmpty()) {
             val token = rest.first()
             if (token is NumToken) {
-                throw ParserException("Unexpect num", pos)
+                throw ParserException("Unexpect num", pos, 0)
             } else if (token is OpToken) {
                 if (token.op == ')') {
                     next()
@@ -41,7 +41,7 @@ class ArithmeticParser(str: String) {
         while (!rest.isEmpty()) {
             val token = rest[0]
             if (token is NumToken) {
-                throw ParserException("Unexpected num", pos)
+                throw ParserException("Unexpected num", pos, 0)
             } else if (token is OpToken) {
                 if (token.op == ')' || binOp[token.op] == 0) {
                     return prevNode
@@ -60,7 +60,7 @@ class ArithmeticParser(str: String) {
             return prevNode
         val token = rest.first()
         if (token is NumToken) {
-            throw ParserException("Unexpected num", pos)
+            throw ParserException("Unexpected num", pos, 0)
         } else if (token is OpToken) {
             if (binOp[token.op] != 2) {
                 return prevNode
@@ -74,12 +74,12 @@ class ArithmeticParser(str: String) {
 
     fun parseP(): ArithmNode {
         if (rest.isEmpty()) {
-            throw ParserException("Empty Expression", pos)
+            throw ParserException("Empty Expression", pos, 0)
         }
         val firstToken = rest.first()
         if (firstToken is OpToken) {
             if (binOp.containsKey(firstToken.op) || firstToken.op == ')') {
-                throw ParserException("Empty Expression", pos)
+                throw ParserException("Empty Expression", pos, 0)
             }
             next()
             return parseExpr()
@@ -87,7 +87,7 @@ class ArithmeticParser(str: String) {
             next()
             return VArithmNode(firstToken.value)
         }
-        throw ParserException("Strange token", pos)
+        throw ParserException("Strange token", pos, 0)
     }
 
 
@@ -120,7 +120,7 @@ class ArithmeticParser(str: String) {
                 }
             } else {
                 if (!binOp.containsKey(c) && !specialSymbols.contains(c)) {
-                    throw ParserException("Symbol $c isn`t operation or number", i)
+                    throw ParserException("Symbol $c isn`t operation or number", i, 0)
                 }
                 if (curToken != null) {
                     res.add(curToken)
@@ -146,7 +146,7 @@ fun getStringFromFile(fileName: String): String {
 fun parse(s: String): Pair<List<ArithmToken>, ArithmNode> {
     val parser = ArithmeticParser(s)
     if (s.isEmpty()) {
-        throw ParserException("Empty Expression", s.length)
+        throw ParserException("Empty Expression", s.length, 0)
     }
     if (s.first() == '(' && s.last() == ')') {
         if (parser.check(s)) {

@@ -221,4 +221,95 @@ return 42; """
         println(KekParser(s).parseL().getTree())
     }
 
+    @Test
+    fun call() {
+        val s = """
+            func(23);
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test(expected = ParserException::class)
+    fun incorrectNum() {
+        val s = """
+            42;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test(expected = ParserException::class)
+    fun incorrectI() {
+        val s = """
+            kek;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test(expected = ParserException::class)
+    fun emptyArgsIf() {
+        val s = """
+           if() {
+            kek();
+           }
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test(expected = ParserException::class)
+    fun booleanTrue() {
+        val s = """
+           true;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test(expected = ParserException::class)
+    fun booleanFalse() {
+        val s = """
+           false;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test(expected = ParserException::class)
+    fun readIncorrect() {
+        val s = """
+           read;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun emptyIf() {
+        val s = """
+           if(s) {
+           }
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun assignment() {
+        val s = """
+            x = 23;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun return2() {
+        val s = """
+            return (f(2) + 23) * 4;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun emptyArgs() {
+        val s = """
+           f();
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
 }

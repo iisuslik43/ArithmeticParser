@@ -54,13 +54,14 @@ I = `[a-z_]\w*`
 
 * Все выражения
 
-ST = `IF | EXPR ; | Write ; | WHILE | ASSIGN ; | return EXPR;`
+ST = `IF | CALL ; | Write ; | WHILE | ASSIGN ; | return EXPR;`
 
 * Маленькое выражение из чисел, идентификаторов и вызовов функций
 
 EXPR = `V | V OP EXPR`
 
 V = `NUM | I | CALL | FUN | read | true | false | (EXPR)`
+
 
 * Функция, нет имени, потому что функции - это тоже объекты и их
 нужно писать через =

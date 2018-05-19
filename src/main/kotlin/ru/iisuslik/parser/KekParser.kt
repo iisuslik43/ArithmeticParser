@@ -11,7 +11,7 @@ class KekParser(s: String) {
 
     private fun next(): Token {
         if (rest.isEmpty()) {
-            throw ParserException("Unexpected end of file", -1)
+            throw ParserException("Unexpected end of file", -1, -1)
         }
         val res = rest.first()
         rest = rest.drop(1)
@@ -34,7 +34,7 @@ class KekParser(s: String) {
         if (OToken(stringNumber, pos, s).isOk) {
             return OToken(stringNumber, pos, s)
         }
-        throw ParserException("No such token in $pos: \"$s\"", pos)
+        throw ParserException("No such token in $pos: \"$s\"", pos, stringNumber)
     }
 
     private fun clearBuilder(sb: StringBuilder, tokens: MutableList<Token>, stringNumber: Int, pos: Int) {
@@ -78,7 +78,7 @@ class KekParser(s: String) {
                             i++
                         } else {
                             if (!OToken(stringNumber, i, "${s[i]}").isOk) {
-                                throw ParserException("No such token in $pos: \"$s\"", pos)
+                                throw ParserException("No such token in $pos: \"$s\"", pos, stringNumber)
                             }
                             tokens.add(OToken(stringNumber, i, "${s[i]}"))
                         }
@@ -120,17 +120,20 @@ class KekParser(s: String) {
                 KeyWord.RETURN -> parseReturn()
                 KeyWord.WHILE -> parseWhile()
                 KeyWord.WRITE -> parseWrite()
-                else -> throw ParserException("Strange keyword ${first.keyWord} in statement", first.pos)
+                else -> throw ParserException("Strange keyword ${first.keyWord} in statement", first.pos, first.sNumb)
             }
         }
-        if (rest.size >= 2 && rest[0] is IToken && rest[1] is OToken && rest[1].s == "=") {
+        if (rest.size >= 2 && first is IToken && rest[1] is SToken && rest[1].s == "(") {
+            val res = parseCall()
+            skipSplit(";")
+            return CallStNode(res)
+        }
+        if (rest.size >= 2 && first is IToken && rest[1] is OToken && rest[1].s == "=") {
             val res = ANode(INode(next() as IToken), next() as OToken, parseExpr())
             skipSplit(";")
             return res
         }
-        val res = ExprStNode(parseExpr())
-        skipSplit(";")
-        return res
+        throw ParserException("Strange tokens in statement", first.pos, first.sNumb)
     }
 
     private fun parseStList(): List<StNode> {
@@ -161,7 +164,7 @@ class KekParser(s: String) {
             return when (first.keyWord) {
                 KeyWord.FUN -> parseFun()
                 KeyWord.READ -> parseRead()
-                else -> throw ParserException("Strange keyword ${first.keyWord} in expression", first.pos)
+                else -> throw ParserException("Strange keyword ${first.keyWord} in expression", first.pos, first.sNumb)
             }
         }
         if (first is BToken) {
@@ -185,7 +188,7 @@ class KekParser(s: String) {
             skipSplit(")")
             return ExprVNode(res)
         }
-        throw ParserException("Unexpected token in expression + ${first.pos}", first.pos)
+        throw ParserException("Unexpected token in expression + ${first.pos}", first.pos, first.sNumb)
     }
 
     private fun parseCall(): CallNode {
@@ -264,9 +267,9 @@ class KekParser(s: String) {
     private fun skipSplit(expected: String) {
         val split = next()
         if (split !is SToken) {
-            throw ParserException("Strange token ${split}", split.pos)
+            throw ParserException("Strange token ${split}", split.pos, split.sNumb)
         } else if (split.split != expected) {
-            throw ParserException("Strange split token ${split.split}", split.pos)
+            throw ParserException("Strange split token ${split.split}", split.pos, split.sNumb)
         }
     }
 

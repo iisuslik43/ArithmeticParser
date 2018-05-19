@@ -116,6 +116,16 @@ class ReadNode(var keyWord: KToken) : VNode {
 
 interface StNode : Node
 
+class CallStNode(val callNode: CallNode) : StNode {
+    override fun getTree(prefix: String, isTail: Boolean): String {
+        return callNode.getTree(prefix, isTail)
+    }
+
+    override fun toString(): String {
+        return callNode.toString()
+    }
+}
+
 class IfNode(var ifWord: KToken, var condition: ExprNode, var ifBody: NodeList<StNode>,
              var elseWord: KToken? = null, var elseBody: NodeList<StNode>? = null) : StNode {
 
@@ -180,7 +190,6 @@ class ANode(var varName: INode, var EqOp: OToken, var expr: ExprNode) : StNode {
     override fun getTree(prefix: String, isTail: Boolean): String {
         var res = prefix + (if (isTail) "└── " else "├── ") + "Assignment" + '\n'
         res += varName.getTree(prefix + (if (isTail) "    " else "│   "), false)
-        res += prefix + (if (isTail) "    " else "│   ") + "├── " + EqOp + '\n'
         res += expr.getTree(prefix + (if (isTail) "    " else "│   "), true)
         return res
     }
@@ -231,7 +240,9 @@ class NodeList<T>(val list: List<T>) {
         for (i in 0 until list.size - 1) {
             res += (list[i] as Node).getTree(prefix + (if (isTail) "    " else "│   "), false)
         }
-        res += (list[list.size - 1] as Node).getTree(prefix + (if (isTail) "    " else "│   "), true)
+        if (list.size > 0) {
+            res += (list[list.size - 1] as Node).getTree(prefix + (if (isTail) "    " else "│   "), true)
+        }
         return res
     }
 
