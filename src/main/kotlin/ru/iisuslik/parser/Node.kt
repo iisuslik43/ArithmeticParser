@@ -102,19 +102,23 @@ class ExprVNode(var node: ExprNode) : VNode {
     }
 }
 
-class ReadNode(var keyWord: KToken) : VNode {
-    override fun getTree(prefix: String, isTail: Boolean): String {
-        return prefix + (if (isTail) "└── " else "├── ") + keyWord + '\n'
-    }
-
-    override fun toString(): String {
-        return "$keyWord"
-    }
-}
 
 ///
 
 interface StNode : Node
+
+
+class ReadNode(var readWord: KToken, val value: INode) : StNode {
+    override fun getTree(prefix: String, isTail: Boolean): String {
+        var res = prefix + (if (isTail) "└── " else "├── ") + readWord + '\n'
+        res += value.getTree(prefix + (if (isTail) "    " else "│   "), true)
+        return res
+    }
+
+    override fun toString(): String {
+        return "$readWord"
+    }
+}
 
 class CallStNode(val callNode: CallNode) : StNode {
     override fun getTree(prefix: String, isTail: Boolean): String {

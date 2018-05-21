@@ -138,6 +138,7 @@ class KekParserTest {
     if (x == y) {
         c = x + y;
         write(c);
+        read(y);
         return false;
     }
     else {
@@ -157,7 +158,6 @@ while(x) {
 
 return 42; """
         println(KekParser(s).stringRest())
-        println(KekParser(s).parseL())
         println(KekParser(s).parseL().getTree())
     }
 
@@ -194,7 +194,7 @@ return 42; """
     @Test
     fun whileTest() {
         val s = """
-    while (f(x * y, 43)) {
+    while (f(x * y, 43) == 5) {
         c = 73e+23;
         write(c);
     }
@@ -206,7 +206,7 @@ return 42; """
     fun writeRead() {
         val s = """
         write(func(2+3) + 6);
-        x = read;
+        read(x);
     """
         println(KekParser(s).parseL().getTree())
     }
@@ -279,6 +279,15 @@ return 42; """
         println(KekParser(s).parseL().getTree())
     }
 
+
+    @Test(expected = ParserException::class)
+    fun readIncorrect2() {
+        val s = """
+           read(x + 2);
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
     @Test
     fun emptyIf() {
         val s = """
@@ -308,6 +317,59 @@ return 42; """
     fun emptyArgs() {
         val s = """
            f();
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun superFun() {
+        val s = """
+           f = fun (x, y) -> fun(a, b) -> 23 + 22;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun superFun2() {
+        val s = """
+           f = fun (x, y) -> (fun(a, b) -> 23 + 22);
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+
+
+    @Test
+    fun two() {
+        val s = """
+           two = fun () -> 2;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun returnIfElse() {
+        val s = """
+           return if (2) {43} else {23}
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun returnIf() {
+        val s = """
+           return if (2) {43}
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun forWhile() {
+        val s = """
+           for(i = 0; i < n; i = i + 1) {
+                func(i);
+                x = 43;
+           }
     """
         println(KekParser(s).parseL().getTree())
     }

@@ -9,11 +9,12 @@ enum class KeyWord() {
     RETURN,
     FUN,
     DO,
-    THEN
+    THEN,
+    FOR
 }
 
 val splitTokens = setOf("(", ")", ";", ",", "{", "}")
-val operations = setOf("+", "-", "*", "/", "%", "==", "!=", ">", ">=", "<", "<=", "&&", "||", "=")
+val operations = setOf("+", "-", "*", "/", "%", "==", "!=", ">", ">=", "<", "<=", "&&", "||", "=", "->")
 
 
 open class Token(sNumber: Int, position: Int, str: String) {

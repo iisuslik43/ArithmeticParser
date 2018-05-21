@@ -54,13 +54,13 @@ I = `[a-z_]\w*`
 
 * Все выражения
 
-ST = `IF | CALL ; | Write ; | WHILE | ASSIGN ; | return EXPR;`
+ST = `IF | CALL ; | RW ; | WHILE | ASSIGN ; | return EXPR;`
 
 * Маленькое выражение из чисел, идентификаторов и вызовов функций
 
 EXPR = `V | V OP EXPR`
 
-V = `NUM | I | CALL | FUN | read | true | false | (EXPR)`
+V = `NUM | I | CALL | FUN | true | false | (EXPR)`
 
 
 * Функция, нет имени, потому что функции - это тоже объекты и их
@@ -86,7 +86,7 @@ WHILE = `while (EXPR) {ST*}`
 
 * Чтение и запись
 
-Write = `write(EXPR)`
+RW = `write(EXPR) | read(I)`
 
 * Вся программа
 
@@ -117,4 +117,70 @@ while(x) {
 }
 
 return 42;
+```
+# Синтаксический сахар
+
+* Почти лямбды
+
+`fun (LIST(I)) -> V` заменяется на `fun (LIST(I)) {return V;}`
+(деревья у таких выражений будут одинаковыми)
+
+Например:
+
+`two = fun () -> 2` => `two = fun () { return 2}`
+
+`f = fun (x) -> (fun() -> 23 + 22);` 
+
+Заменяется на:
+
+```
+f = fun (x) { 
+    return fun () {
+            return 23; 
+        } + 22;
+    }
+```
+
+* Return IF
+
+`return if (EXPR) { V1 } else { V2 };` заменяется на:
+
+```
+if(EXPR) {
+    return V1
+} else {
+    return V2
+}
+```
+
+* For loop
+
+`for (ST1; EXPR; ST1) {List(ST)}` меняется на:
+
+```
+ST1;
+while (EXPR) {
+LIST(ST);
+ST2;
+}
+```
+
+Например:
+
+```
+for(i = 0; i < n; i = i + 1) {
+    func(i);
+    x = 43;
+}
+```
+
+Заменится на:
+
+```
+i = 0;
+while (i < n) {
+    func(i);
+    x = 43;
+    i = i + 1;
+}
 ```

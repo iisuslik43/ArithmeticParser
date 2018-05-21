@@ -14,7 +14,7 @@ class KekParser(s: String) {
             throw ParserException("Unexpected end of file", -1, -1)
         }
         val res = rest.first()
-        rest = rest.drop(1)
+        rest = rest.drop(1).toMutableList()
         return res
     }
 
@@ -37,7 +37,8 @@ class KekParser(s: String) {
         throw ParserException("No such token in $pos: \"$s\"", pos, stringNumber)
     }
 
-    private fun clearBuilder(sb: StringBuilder, tokens: MutableList<Token>, stringNumber: Int, pos: Int) {
+    private fun clearBuilder(sb: StringBuilder, tokens: MutableList<Token>,
+                             stringNumber: Int, pos: Int) {
         if (!sb.isEmpty()) {
             val token = getToken(stringNumber, pos, sb.toString())
             tokens.add(token)
@@ -45,7 +46,7 @@ class KekParser(s: String) {
         }
     }
 
-    private fun getTokens(str: String): List<Token> {
+    private fun getTokens(str: String): MutableList<Token> {
         val tokens = mutableListOf<Token>()
         val sb = StringBuilder()
         var stringNumber = 0
@@ -73,7 +74,8 @@ class KekParser(s: String) {
                         sb.append(c)
                     } else {
                         clearBuilder(sb, tokens, stringNumber, pos)
-                        if (i + 1 in s.indices && OToken(stringNumber, pos, "${s[i]}${s[i + 1]}").isOk) {
+                        if (i + 1 in s.indices && OToken(stringNumber, pos,
+                                        "${s[i]}${s[i + 1]}").isOk) {
                             tokens.add(OToken(stringNumber, i, "${s[i]}${s[i + 1]}"))
                             i++
                         } else {
@@ -107,39 +109,49 @@ class KekParser(s: String) {
     fun parseL(): MainNode {
         val program = mutableListOf<StNode>()
         while (!rest.isEmpty()) {
-            program.add(parseSt())
+            program.addAll(parseSt())
         }
         return MainNode(NodeList(program))
     }
 
-    private fun parseSt(): StNode {
-        val first = rest.first()
+    private fun parseSt(lastInFor: Boolean = false): List<StNode> {
+        var first = rest.first()
         if (first is KToken) {
             return when (first.keyWord) {
-                KeyWord.IF -> parseIf()
-                KeyWord.RETURN -> parseReturn()
-                KeyWord.WHILE -> parseWhile()
-                KeyWord.WRITE -> parseWrite()
-                else -> throw ParserException("Strange keyword ${first.keyWord} in statement", first.pos, first.sNumb)
+                KeyWord.IF -> listOf(parseIf())
+                KeyWord.RETURN -> listOf(parseReturn())
+                KeyWord.WHILE -> listOf(parseWhile())
+                KeyWord.WRITE -> listOf(parseWrite())
+                KeyWord.READ -> listOf(parseRead())
+                KeyWord.FOR -> parseFor()
+                else -> throw ParserException("Strange keyword ${first.keyWord} in statement",
+                        first.pos, first.sNumb)
             }
         }
         if (rest.size >= 2 && first is IToken && rest[1] is SToken && rest[1].s == "(") {
             val res = parseCall()
-            skipSplit(";")
-            return CallStNode(res)
+            if(!lastInFor)
+                skipSplit(";")
+            return listOf(CallStNode(res))
         }
-        if (rest.size >= 2 && first is IToken && rest[1] is OToken && rest[1].s == "=") {
-            val res = ANode(INode(next() as IToken), next() as OToken, parseExpr())
-            skipSplit(";")
-            return res
+
+        if (rest.size >= 2) {
+            first = next()
+            val second = next()
+            if (!rest.isEmpty() && first is IToken && second is OToken && second.op == "=") {
+                val res = ANode(INode(first), second, parseExpr())
+                if(!lastInFor)
+                    skipSplit(";")
+                return listOf(res)
+            }
         }
         throw ParserException("Strange tokens in statement", first.pos, first.sNumb)
     }
 
-    private fun parseStList(): List<StNode> {
+    private fun parseStList(): MutableList<StNode> {
         val statements = mutableListOf<StNode>()
         while (rest.first() !is SToken || (rest.first() as SToken).split != "}") {
-            statements.add(parseSt())
+            statements.addAll(parseSt())
         }
         return statements
     }
@@ -163,8 +175,8 @@ class KekParser(s: String) {
         if (first is KToken) {
             return when (first.keyWord) {
                 KeyWord.FUN -> parseFun()
-                KeyWord.READ -> parseRead()
-                else -> throw ParserException("Strange keyword ${first.keyWord} in expression", first.pos, first.sNumb)
+                else -> throw ParserException("Strange keyword ${first.keyWord} in expression",
+                        first.pos, first.sNumb)
             }
         }
         if (first is BToken) {
@@ -200,7 +212,16 @@ class KekParser(s: String) {
     }
 
     private fun parseRead(): ReadNode {
-        return ReadNode(next() as KToken)
+        val readWord = next() as KToken
+        skipSplit("(")
+        val next = next()
+        if (next !is IToken) {
+            throw ParserException("Unexpected token in read arg", next.pos, next.sNumb)
+        }
+        val res = ReadNode(readWord, INode(next))
+        skipSplit(")")
+        skipSplit(";")
+        return res
     }
 
     private fun parseFun(): FunNode {
@@ -208,6 +229,12 @@ class KekParser(s: String) {
         skipSplit("(")
         val args = parseArgList()
         skipSplit(")")
+        val next = rest.first()
+        if (next is OToken && next.op == "->") {
+            next()
+            val body = listOf<StNode>(RetNode(KToken(next.sNumb, next.pos, "return"), ExprNode(parseV())))
+            return FunNode(funWord as KToken, NodeList(args), NodeList(body))
+        }
         skipSplit("{")
         val body = parseStList()
         skipSplit("}")
@@ -258,8 +285,51 @@ class KekParser(s: String) {
         return WhileNode(whileToken as KToken, condition, NodeList(body))
     }
 
-    private fun parseReturn(): RetNode {
-        val res = RetNode(next() as KToken, parseExpr())
+    private fun parseFor() : List<StNode> {
+        val res = mutableListOf<StNode>()
+        val forWord = next()
+        skipSplit("(")
+        val init = parseSt().first()
+        println(stringRest())
+        val condition = parseExpr()
+        skipSplit(";")
+        val findNext = parseSt(true).first()
+        skipSplit(")")
+        skipSplit("{")
+        val body = parseStList()
+        body.add(findNext)
+        skipSplit("}")
+        res.add(init)
+        res.add(WhileNode(KToken(-1, -1, "while"), condition, NodeList(body)))
+        return res
+    }
+
+    private fun parseReturn(): StNode {
+        val returnWord = next() as KToken
+        if (!rest.isEmpty()) {
+            val next = rest.first()
+            if (next is KToken && next.keyWord == KeyWord.IF) {
+                val ifToken = next()
+                skipSplit("(")
+                val condition = parseExpr()
+                skipSplit(")")
+                skipSplit("{")
+                val ifReturn = RetNode(KToken(-1, -1, "return"), ExprNode(parseV()))
+                skipSplit("}")
+                if (!rest.isEmpty()) {
+                    val first = rest.first()
+                    if (first is KToken && first.keyWord == KeyWord.ELSE) {
+                        val elseWord = next() as KToken
+                        skipSplit("{")
+                        val elseReturn = RetNode(KToken(-1, -1, "return"), ExprNode(parseV()))
+                        skipSplit("}")
+                        return IfNode(ifToken as KToken, condition, NodeList(listOf(ifReturn)), elseWord, NodeList(listOf(elseReturn)))
+                    }
+                }
+                return IfNode(ifToken as KToken, condition, NodeList(listOf(ifReturn)))
+            }
+        }
+        val res = RetNode(returnWord, parseExpr())
         skipSplit(";")
         return res
     }
@@ -286,6 +356,7 @@ class KekParser(s: String) {
         skipSplit(";")
         return res
     }
+
 }
 
 fun main(args: Array<String>) {
@@ -299,5 +370,6 @@ fun main(args: Array<String>) {
 }
 
 class ParserArgs(parser: ArgParser) {
-    val filename: String by parser.storing("--file", help = "choose port that server will listen to")
+    val filename: String by parser.storing("--file",
+            help = "choose port that server will listen to")
 }
