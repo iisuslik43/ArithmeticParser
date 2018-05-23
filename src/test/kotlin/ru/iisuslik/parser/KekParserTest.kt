@@ -374,4 +374,20 @@ return 42; """
         println(KekParser(s).parseL().getTree())
     }
 
+    @Test
+    fun prior() {
+        val s = """
+           x = 2 + 2 * 3 >= 4 || 2 + 2 < 2 && 3;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
+    @Test
+    fun prior2() {
+        val s = """
+           x = ((2 + 2) * 3 >= 4 || 2) && 3;
+    """
+        println(KekParser(s).parseL().getTree())
+    }
+
 }

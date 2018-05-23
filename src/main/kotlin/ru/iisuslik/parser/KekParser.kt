@@ -156,19 +156,23 @@ class KekParser(s: String) {
         return statements
     }
 
-    private fun parseExpr(): ExprNode {
-        val v = parseV()
+    private fun parseExpr(prior: Int = 6): ExprNode {
+        if(prior == 0) {
+            return ExprNode(parseV())
+        }
+        val left = parseExpr(prior - 1)
         var op: OToken? = null
         var expr: ExprNode? = null
         if (!rest.isEmpty()) {
             val first = rest.first()
-            if (first is OToken && operations.contains(first.op)) {
+            if (first is OToken && operations.contains(first.op) && operations[first.op] == prior) {
                 op = next() as OToken
-                expr = parseExpr()
+                expr = parseExpr(prior)
             }
         }
-        return ExprNode(v, op, expr)
+        return ExprNode(ExprVNode(left), op, expr)
     }
+
 
     private fun parseV(): VNode {
         val first = rest.first()

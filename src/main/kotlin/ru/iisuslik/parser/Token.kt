@@ -14,7 +14,8 @@ enum class KeyWord() {
 }
 
 val splitTokens = setOf("(", ")", ";", ",", "{", "}")
-val operations = setOf("+", "-", "*", "/", "%", "==", "!=", ">", ">=", "<", "<=", "&&", "||", "=", "->")
+val operations = hashMapOf("+" to 2, "-" to 2, "*" to 1, "/" to 1, "%" to 1, "==" to 4, "!=" to 4, ">" to 3, ">=" to 3,
+        "<" to 3, "<=" to 3, "&&" to 5, "||" to 6, "=" to 9, "->" to 9)
 
 
 open class Token(sNumber: Int, position: Int, str: String) {
